@@ -1,2 +1,3 @@
 LOGIN.env
 .idea/
+__pycache__/
