@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox
-from utils import apis, markets
-from tkinter import ttk
+from utils import apis, markets, responses_path
+from tkinter import ttk, filedialog
 
 
 def ask_confirmation():
@@ -9,6 +9,12 @@ def ask_confirmation():
                                                          " This is an API call")
 
     return result
+
+
+def load_file():
+    path = filedialog.askopenfilename(initialdir=responses_path, filetypes=[('JSON files', "*.json")])
+
+    return path
 
 
 class GUI:
@@ -65,6 +71,7 @@ class GUI:
 
         self.button1.configure(command=controller.get_data_and_update_info)
         self.button2.configure(command=controller.clear_list)
+        self.button4.configure(command=controller.load_json)
 
     def start_gui(self):
         self.window.mainloop()

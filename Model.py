@@ -1,4 +1,4 @@
-from utils import keys
+from utils import keys, responses_path
 import json
 import os
 import requests
@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import List, Tuple
 
 base_url_odds_api = 'https://api.the-odds-api.com'
-responses_path = './responses'
 
 
 # American odds
@@ -40,7 +39,7 @@ def american_to_decimal(odds):
         return odds / 100 + 1
 
 
-def parse_json(json_data, date_time_string):
+def parse_json_odds_api(json_data, date_time_string):
 
     sports_data = {}
     for game in json_data:
@@ -102,9 +101,10 @@ def find_arb_opportunities_two_way(match, home_win_stake, date_time_string) -> L
             away_odds = away_prices[j][0]
             away_bookie = away_prices[j][1]
             away_stake, profit = calculate_arbitrage_two_way(home_odds, away_odds, home_win_stake)
+            roi = round(profit / (home_win_stake + away_stake), 2)
             description = f"{date_time_string} ${home_win_stake} on {home_team} @ {home_odds} ({home_bookie}) " \
                           f"and ${away_stake} on {away_team} " \
-                          f"@ {away_odds} ({away_bookie}) for profit of ${profit}"
+                          f"@ {away_odds} ({away_bookie}) for {roi}% ROI and a profit of ${profit}"
             results.append((profit, description))
 
     return results
@@ -129,10 +129,11 @@ def find_arb_opportunities_three_way(match, home_win_stake, date_time_string) ->
                 draw_bookie = draw_prices[u][1]
                 away_stake, draw_stake, profit = \
                     calculate_arbitrage_three_way(home_odds, away_odds, draw_odds, home_win_stake)
+                roi = round(profit / (home_win_stake + away_stake + draw_stake), 2)
                 description = f"{date_time_string} ${home_win_stake} on {home_team} @ {home_odds} ({home_bookie}), " \
                               f"${away_stake} on {away_team} " \
                               f"@ {away_odds} ({away_bookie}), and {draw_stake} for draw @ {draw_odds} " \
-                              f"({draw_bookie}) for profit of ${profit}"
+                              f"({draw_bookie}) for {roi}% ROI and a profit of ${profit}"
                 results.append((profit, description))
 
     return results
@@ -180,13 +181,13 @@ class Model:
         if api == 'odds-api':
             sports_key = keys.get(api).get(market)
             date_time_string, json_data = self.get_odds_json_odds_api(base_url_odds_api, sports_key, 'us', 'h2h')
+            sports_data = parse_json_odds_api(json_data, date_time_string)
         elif api == 'odds-jam':
             print("This api is not supported yet")
             return
         else:
             raise Exception("Unrecognized api")
 
-        sports_data = parse_json(json_data, date_time_string)
         self.games_data_list.append(sports_data)
         arb_results = find_arbitrage_opportunities(sports_data, 100)
 
@@ -207,7 +208,7 @@ class Model:
         if not os.path.exists(responses_path):
             os.mkdir(responses_path)
 
-        with open(responses_path + '/' + date_time_string + ' ' + sports_key + '.json', 'w') as file:
+        with open(responses_path + '/' + date_time_string + ' odds-api ' + sports_key + '.json', 'w') as file:
             json.dump(data_response, file)
         return date_time_string, response.json()
 
@@ -233,4 +234,25 @@ class Model:
     def clear_opportunities(self):
         self.arb_opportunities = set()
         self.games_data_list = []
+
+    def load_data_from_file(self, path):
+        file_name = path.split("/")[len(path.split("/"))- 1]
+        split_by_space = file_name.split(" ")
+        date_string = split_by_space[0]
+        api = split_by_space[1]
+
+        with open(path, 'r') as file:
+            json_data = json.load(file)
+
+        if api == 'odds-api':
+            sports_data = parse_json_odds_api(json_data, date_string)
+        else:
+            raise Exception('Unrecognized API. The file name must be in the format: "{date} {api} ..."')
+
+        self.games_data_list.append(sports_data)
+        arb_results = find_arbitrage_opportunities(sports_data, 100)
+
+        for tup in arb_results:
+            self.arb_opportunities.add(tup)
+
 

@@ -20,3 +20,7 @@ keys = {
         'Aussie Football': 'aussierules_afl',
     }
 }
+
+
+responses_path = './responses'
+

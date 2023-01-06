@@ -1,4 +1,4 @@
-from GUI import GUI, ask_confirmation
+from GUI import GUI, ask_confirmation, load_file
 from Model import Model
 
 
@@ -20,3 +20,8 @@ class Controller:
     def clear_list(self):
         self.gui.update_scrollable_info([])
         self.model.clear_opportunities()
+
+    def load_json(self):
+        path = load_file()
+        self.model.load_data_from_file(path)
+        self.gui.update_scrollable_info(self.model.get_opportunities())
