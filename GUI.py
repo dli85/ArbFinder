@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.messagebox
+import tkinter.simpledialog
 from utils import apis, markets, responses_path
 from tkinter import ttk, filedialog
 
@@ -7,14 +8,17 @@ from tkinter import ttk, filedialog
 def ask_confirmation():
     result = tkinter.messagebox.askyesno("Confirmation", "Are you sure you would like to get this data?"
                                                          " This is an API call")
-
     return result
 
 
 def load_file():
     path = filedialog.askopenfilename(initialdir=responses_path, filetypes=[('JSON files', "*.json")])
-
     return path
+
+
+def prompt_for_number():
+    number = tkinter.simpledialog.askinteger("New stake", "Enter new stake value $", minvalue=1, maxvalue=1000000000)
+    return number
 
 
 class GUI:
@@ -71,6 +75,7 @@ class GUI:
 
         self.button1.configure(command=controller.get_data_and_update_info)
         self.button2.configure(command=controller.clear_list)
+        self.button3.configure(command=controller.update_stake)
         self.button4.configure(command=controller.load_json)
 
     def start_gui(self):

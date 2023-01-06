@@ -255,4 +255,12 @@ class Model:
         for tup in arb_results:
             self.arb_opportunities.add(tup)
 
+    def update_stake(self, new_stake):
+        self.arb_opportunities = set()
+        for sports_data in self.games_data_list:
+            arb_results = find_arbitrage_opportunities(sports_data, new_stake)
+
+            for tup in arb_results:
+                self.arb_opportunities.add(tup)
+
 

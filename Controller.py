@@ -1,4 +1,4 @@
-from GUI import GUI, ask_confirmation, load_file
+from GUI import GUI, ask_confirmation, load_file, prompt_for_number
 from Model import Model
 
 
@@ -20,6 +20,11 @@ class Controller:
     def clear_list(self):
         self.gui.update_scrollable_info([])
         self.model.clear_opportunities()
+
+    def update_stake(self):
+        new_stake = prompt_for_number()
+        self.model.update_stake(new_stake)
+        self.gui.update_scrollable_info(self.model.get_opportunities())
 
     def load_json(self):
         path = load_file()
