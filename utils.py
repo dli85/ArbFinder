@@ -1,26 +1,3 @@
-apis = ['odds-api', 'odds-jam']
-
-markets = {
-    'odds-api': [
-        'NCAAF US College Football',
-        'NFL US Football',
-        'Aussie Football',
-        'Euroleague Basketball',
-        'NBA Basketball',
-        'US College Basketball',
-        'Cricket Big Bash League',
-        'Cricket International Twenty20',
-        'NHL Ice Hockey',
-        'Mixed Martial Arts',
-        'Aussie Rugby League',
-        'Aussie Soccer'
-    ],
-    'odds-jam': [
-        'NBA',
-        'WNBA',
-    ]
-}
-
 # Api request information, separated by api
 keys = {
     'odds-api': {
@@ -38,7 +15,7 @@ keys = {
 
     },
     'odds-jam': {
-        
+        'NBA': ''
     }
 }
 

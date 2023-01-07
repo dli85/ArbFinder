@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox
 import tkinter.simpledialog
-from utils import apis, markets, responses_path
+from utils import keys, responses_path
 from tkinter import ttk, filedialog, messagebox
 
 
@@ -27,6 +27,9 @@ def show_error_message(error_title, message):
 
 class GUI:
     def __init__(self):
+
+        apis = list(keys.keys())
+
         self.controller = None
 
         self.window = tk.Tk()
@@ -43,12 +46,12 @@ class GUI:
         self.api_selection.set(apis[0])
 
         self.market_selection = tk.StringVar(self.window)
-        self.market_selection.set(markets.get(apis[0])[0])
+        self.market_selection.set(list(keys.get(apis[0]))[0])
 
         self.api_dropdown = tk.OptionMenu(top_bar, self.api_selection, *apis,
                                           command=self.update_dropdowns)
 
-        self.market_dropdown = ttk.Combobox(top_bar, values=markets.get(apis[0]), state='readonly')
+        self.market_dropdown = ttk.Combobox(top_bar, values=list(keys.get(apis[0])), state='readonly')
         self.market_dropdown.configure(width=35)
         self.market_dropdown.current(0)
 
@@ -120,7 +123,7 @@ class GUI:
     def update_dropdowns(self, event=None):
         selected_api = self.api_selection.get()
 
-        self.market_dropdown.configure(values=markets.get(selected_api))
+        self.market_dropdown.configure(values=list(keys.get(selected_api)))
         self.market_dropdown.current(0)
 
     def get_api_market(self):
