@@ -9,6 +9,15 @@ from typing import List, Tuple
 base_url_odds_api = 'https://api.the-odds-api.com'
 
 
+def json_empty(json_data):
+    if isinstance(json_data, dict):
+        return not bool(json_data)
+    elif isinstance(json_data, list):
+        return all(map(json_empty, json_data))
+    else:
+        return False
+
+
 # American odds
 def calculate_arbitrage_two_way(odds1, odds2, stake1) -> Tuple[int, int]:
     odds1 = american_to_decimal(odds1)
@@ -101,7 +110,7 @@ def find_arb_opportunities_two_way(match, home_win_stake, date_time_string) -> L
             away_odds = away_prices[j][0]
             away_bookie = away_prices[j][1]
             away_stake, profit = calculate_arbitrage_two_way(home_odds, away_odds, home_win_stake)
-            roi = round(profit / (home_win_stake + away_stake), 2)
+            roi = round(profit * 100 / (home_win_stake + away_stake), 2)
             description = f"{date_time_string} ${home_win_stake} on {home_team} @ {home_odds} ({home_bookie}) " \
                           f"and ${away_stake} on {away_team} " \
                           f"@ {away_odds} ({away_bookie}) for {roi}% ROI and a profit of ${profit}"
@@ -129,7 +138,7 @@ def find_arb_opportunities_three_way(match, home_win_stake, date_time_string) ->
                 draw_bookie = draw_prices[u][1]
                 away_stake, draw_stake, profit = \
                     calculate_arbitrage_three_way(home_odds, away_odds, draw_odds, home_win_stake)
-                roi = round(profit / (home_win_stake + away_stake + draw_stake), 2)
+                roi = round(profit * 100 / (home_win_stake + away_stake + draw_stake), 2)
                 description = f"{date_time_string} ${home_win_stake} on {home_team} @ {home_odds} ({home_bookie}), " \
                               f"${away_stake} on {away_team} " \
                               f"@ {away_odds} ({away_bookie}), and {draw_stake} for draw @ {draw_odds} " \
@@ -181,12 +190,16 @@ class Model:
         if api == 'odds-api':
             sports_key = keys.get(api).get(market)
             date_time_string, json_data = self.get_odds_json_odds_api(base_url_odds_api, sports_key, 'us', 'h2h')
+
+            if json_empty(json_data):
+                raise ValueError("Unable to fetch any upcoming games from the selected api for this market")
+
             sports_data = parse_json_odds_api(json_data, date_time_string)
         elif api == 'odds-jam':
             print("This api is not supported yet")
             return
         else:
-            raise Exception("Unrecognized api")
+            raise NameError("Unrecognized api")
 
         self.games_data_list.append(sports_data)
         arb_results = find_arbitrage_opportunities(sports_data, 100)
@@ -218,9 +231,10 @@ class Model:
         arb_opportunities_only_str = []
         for profit, desc in arb_opp_list:
             arb_opportunities_only_str.append(desc)
+
         if len(arb_opportunities_only_str) <= 20:
             # Less than 20 elements
-            return arb_opp_list
+            return arb_opportunities_only_str
         elif find_first_pos_index(arb_opp_list, 0, len(arb_opp_list) - 1) == -1:
             # Greater than 20 elements but no positive arbitrage
             return arb_opportunities_only_str[:20]
@@ -236,7 +250,7 @@ class Model:
         self.games_data_list = []
 
     def load_data_from_file(self, path):
-        file_name = path.split("/")[len(path.split("/"))- 1]
+        file_name = path.split("/")[len(path.split("/")) - 1]
         split_by_space = file_name.split(" ")
         date_string = split_by_space[0]
         api = split_by_space[1]
@@ -244,10 +258,13 @@ class Model:
         with open(path, 'r') as file:
             json_data = json.load(file)
 
+        if json_empty(json_data):
+            raise ValueError("JSON File is empty")
+
         if api == 'odds-api':
             sports_data = parse_json_odds_api(json_data, date_string)
         else:
-            raise Exception('Unrecognized API. The file name must be in the format: "{date} {api} ..."')
+            raise NameError('Unrecognized API. The file name must be in the format: "{date} {api} ..."')
 
         self.games_data_list.append(sports_data)
         arb_results = find_arbitrage_opportunities(sports_data, 100)

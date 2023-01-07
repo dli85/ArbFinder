@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.messagebox
 import tkinter.simpledialog
 from utils import apis, markets, responses_path
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, messagebox
 
 
 def ask_confirmation():
@@ -19,6 +19,10 @@ def load_file():
 def prompt_for_number():
     number = tkinter.simpledialog.askinteger("New stake", "Enter new stake value $", minvalue=1, maxvalue=1000000000)
     return number
+
+
+def show_error_message(error_title, message):
+    messagebox.showerror(error_title, message)
 
 
 class GUI:
