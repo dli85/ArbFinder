@@ -68,14 +68,17 @@ class GUI:
         self.button4.grid(row=0, column=5)
 
         self.scrollable_info_canvas = tk.Canvas(self.window)
-        scrollbar = tk.Scrollbar(self.window, orient="vertical", command=self.scrollable_info_canvas.yview)
-        self.scrollable_info_canvas.configure(yscrollcommand=scrollbar.set)
+        self.main_info_scrollbar = tk.Scrollbar(self.window, orient="vertical", command=self.scrollable_info_canvas.yview)
+        self.scrollable_info_canvas.configure(yscrollcommand=self.main_info_scrollbar.set)
 
         self.scrollable_info_canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        self.main_info_scrollbar.pack(side="right", fill="y")
 
         self.scroll_frame = tk.Frame(self.scrollable_info_canvas)
         self.items = []
+
+        self.market_dropdown.bind("<Enter>", self.disable_main_info_scrolling)
+        self.market_dropdown.bind("<Leave>", self.enable_main_info_scrolling)
 
     def set_controller(self, controller):
         self.controller = controller
@@ -84,6 +87,12 @@ class GUI:
         self.button2.configure(command=controller.clear_list)
         self.button3.configure(command=controller.update_stake)
         self.button4.configure(command=controller.load_json)
+
+    def disable_main_info_scrolling(self, event):
+        pass
+
+    def enable_main_info_scrolling(self, event):
+        pass
 
     def start_gui(self):
         self.window.mainloop()

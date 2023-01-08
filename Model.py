@@ -164,17 +164,21 @@ def find_arbitrage_opportunities(games_data, stake) -> List[Tuple[int, str]]:
 
 # Finds the index of the first positive element in arb_list
 # Returns -1 if there are no positive numbers
-def find_first_pos_index(arb_list: List[Tuple[int, str]], low, high):
-    if high >= low:
-        mid = int((high + low) / 2)
-        if arb_list[mid][0] >= 0:
-            if mid == 0 or arb_list[mid - 1][0] < 0:
-                return mid
-            else:
-                return find_first_pos_index(arb_list, low, mid - 1)
+def find_first_pos_index(arb_list: List[Tuple[int, str]]):
+    left = 0
+    right = len(arb_list) - 1
+
+    while left <= right:
+        mid = (left + right) // 2
+        if arb_list[mid][0] < 0:
+            left = mid + 1
         else:
-            return find_first_pos_index(arb_list, mid + 1, high)
-    return -1
+            right = mid - 1
+
+    if left > 0:
+        return left - 1
+    else:
+        return -1
 
 
 class Model:
@@ -229,19 +233,20 @@ class Model:
         arb_opp_list = list(self.arb_opportunities)
         arb_opp_list = sorted(arb_opp_list, key=lambda x: x[0], reverse=True)
         arb_opportunities_only_str = []
+
         for profit, desc in arb_opp_list:
             arb_opportunities_only_str.append(desc)
 
         if len(arb_opportunities_only_str) <= 20:
             # Less than 20 elements
             return arb_opportunities_only_str
-        elif find_first_pos_index(arb_opp_list, 0, len(arb_opp_list) - 1) == -1:
+        elif find_first_pos_index(arb_opp_list) == -1:
             # Greater than 20 elements but no positive arbitrage
             return arb_opportunities_only_str[:20]
-        elif find_first_pos_index(arb_opp_list, 0, len(arb_opp_list) - 1) > -1:
-            pos_index = find_first_pos_index(arb_opp_list, 0, len(arb_opp_list) - 1)
+        elif find_first_pos_index(arb_opp_list) > -1:
+            pos_index = find_first_pos_index(arb_opp_list)
             # Greater than 20 elements and there is a positive arbitrage
-            return arb_opportunities_only_str[:min(pos_index + 5, len(arb_opp_list) - 1)]
+            return arb_opportunities_only_str[:min(pos_index + 5, len(arb_opp_list) - 1, 200)]
 
         return arb_opportunities_only_str[:20]
 
