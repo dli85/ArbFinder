@@ -42,9 +42,6 @@ keys = {
         'UEFA Europa Conference League': 'soccer_uefa_europa_conference_league',
         'UEFA Europa League': 'soccer_uefa_europa_league',
     },
-    'odds-jam': {
-        'NBA': ''
-    }
 }
 
 responses_path = './responses'

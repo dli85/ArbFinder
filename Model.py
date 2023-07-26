@@ -114,7 +114,7 @@ def find_arb_opportunities_two_way(match, home_win_stake, date_time_string) -> L
             description = f"{date_time_string} ${home_win_stake} on {home_team} @ {home_odds} ({home_bookie}) " \
                           f"and ${away_stake} on {away_team} " \
                           f"@ {away_odds} ({away_bookie}) for {roi}% ROI and a profit of ${profit}"
-            results.append((profit, description))
+            results.append((roi, description))
 
     return results
 
@@ -143,7 +143,7 @@ def find_arb_opportunities_three_way(match, home_win_stake, date_time_string) ->
                               f"${away_stake} on {away_team} " \
                               f"@ {away_odds} ({away_bookie}), and {draw_stake} for draw @ {draw_odds} " \
                               f"({draw_bookie}) for {roi}% ROI and a profit of ${profit}"
-                results.append((profit, description))
+                results.append((roi, description))
 
     return results
 
